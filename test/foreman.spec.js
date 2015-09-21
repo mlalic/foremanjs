@@ -3,6 +3,7 @@ import Brick from '../src/brick';
 
 import itertools from '../src/itertools';
 import BaseRange from '../src/range';
+import Composer from '../src/composer';
 
 import { Option, Eventual } from '../src/utils';
 
@@ -835,6 +836,71 @@ describe('Foreman', () => {
         });
 
         assert.deepEqual(res, 6);
+      });
+    });
+  });
+
+  describe('Composer', () => {
+    let Sum;
+    let echoBrick;
+    beforeEach(() => {
+      Sum = Brick.create({
+        fn(args) { return args.x + args.y; },
+        args: ['x', 'y'],
+      });
+
+      echoBrick = Brick.create({
+        fn(args) {
+          return args;
+        },
+        args: ['a', 'b', 'c'],
+      });
+    });
+
+    it('returns bricks', () => {
+      const composer = new Composer();
+      composer.register('sum', [], Sum);
+
+      const sum = composer.get('sum');
+
+      assert.deepEqual(sum.fn({ x: 1, y: 2 }), 3);
+    });
+
+    it('binds values to bricks in container', () => {
+      const composer = new Composer();
+      composer.register('sum', { x: 'static' }, Sum);
+      composer.register('static', [], () => 2);
+
+      const sum = composer.get('sum');
+
+      assert.deepEqual(sum.args, ['y']);
+      assert.deepEqual(sum.fn({ y: 1 }), 3);
+    });
+
+    it('composes bricks', () => {
+      const composer = new Composer();
+      composer.register('echo', { a: 'sum' }, echoBrick);
+      composer.register('sum', [], Sum);
+
+      const echo = composer.get('echo');
+
+      assert.deepEqual(echo.args, ['x', 'y', 'b', 'c']);
+      assert.deepEqual(echo.fn({ x: 1, y: 2, b: 3, c: 4 }), {
+        a: 3, b: 3, c: 4,
+      });
+    });
+
+    it('combines compose and bind', () => {
+      const composer = new Composer();
+      composer.register('echo', { a: 'sum' }, echoBrick);
+      composer.register('sum', { x: 'static' }, Sum);
+      composer.register('static', [], () => 2);
+
+      const echo = composer.get('echo');
+
+      assert.deepEqual(echo.args, ['y', 'b', 'c']);
+      assert.deepEqual(echo.fn({ y: 2, b: 3, c: 4 }), {
+        a: 4, b: 3, c: 4,
       });
     });
   });
