@@ -3,7 +3,7 @@ import Brick from '../src/brick';
 
 import itertools from '../src/itertools';
 import BaseRange from '../src/range';
-import Composer from '../src/composer';
+import Composer, { intoBrickParam } from '../src/composer';
 
 import { Option, Eventual } from '../src/utils';
 
@@ -902,6 +902,19 @@ describe('Foreman', () => {
       assert.deepEqual(echo.fn({ y: 2, b: 3, c: 4 }), {
         a: 4, b: 3, c: 4,
       });
+    });
+
+    it('allows higher-order bricks', () => {
+      const composer = new Composer();
+      composer.register('foo', { 'brick': 'sum' }, Brick.create({
+        fn(args) { return args.brick.fn({ x: 5, y: 10 }) },
+        args: ['brick'],
+      }));
+      composer.register('sum', {}, intoBrickParam(Sum));
+
+      const brick = composer.get('foo');
+
+      assert.deepEqual(brick.fn(), 15);
     });
   });
 

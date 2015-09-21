@@ -20,7 +20,7 @@ function brickFactory(brick) {
     const valueDeps = {};
     for (const depName in deps) {
       const dep = deps[depName];
-      if (BrickTemplate.isPrototypeOf(dep)) {
+      if (BrickTemplate.isPrototypeOf(dep) && !dep[higherOrderSymbol]) {
         brickDeps[depName] = dep;
       } else {
         valueDeps[depName] = dep;
