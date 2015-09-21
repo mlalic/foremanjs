@@ -7,9 +7,25 @@
  */
 import 'core-js/shim';
 import Brick_ from './brick';
-
-export default {
-  Brick: Brick_
-}
+import Composer_, { intoBrickParam as intoBrickParam_ }  from './composer';
+import BaseRange_ from './range';
+import itertools_ from './itertools';
+import * as utils_ from './utils';
+import * as range_ from './range';
 
 export const Brick = Brick_;
+export const Composer = Composer_;
+export const BaseRange = BaseRange_;
+export const intoBrickParam = intoBrickParam_;
+export const itertools = itertools_;
+export const utils = utils_;
+export const range = range_;
+
+export default {
+  Brick,
+  Composer,
+  BaseRange,
+  intoBrickParam,
+  utils,
+  range,
+}
